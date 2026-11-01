@@ -288,8 +288,8 @@ def run_validation(data_path,output_dir,config=None):
     groups=spatial_groups(df,cfg['block_km'],cfg.get('grid_offset_km',0))
     metadata=dict(config=cfg,data_sha256=hashlib.sha256(Path(data_path).read_bytes()).hexdigest(),features=list(matrix.columns),
         python=__import__('sys').version,versions={},status='running',interpretation='retrospective case-control discrimination; exclusion uses known fires across 2019-2025',
-        code_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest() if '__file__' in globals() else globals().get('NOTEBOOK_IMPLEMENTATION_SHA','not_recorded'))
-    for package in ['numpy','pandas','scikit-learn','torch','pyproj']:
+        code_sha256=globals().get('NOTEBOOK_IMPLEMENTATION_SHA') or (hashlib.sha256(Path(__file__).read_bytes()).hexdigest() if '__file__' in globals() else 'not_recorded'))
+    for package in ['numpy','pandas','scipy','scikit-learn','torch','pyproj']:
         try: metadata['versions'][package]=importlib.metadata.version(package)
         except importlib.metadata.PackageNotFoundError: pass
     (output_dir/'execution.json').write_text(json.dumps(metadata,indent=2),encoding='utf-8')

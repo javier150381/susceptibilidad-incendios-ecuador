@@ -188,6 +188,8 @@ def build_paper_figures(results,out,dataset=None,inventory=None,reference_result
                 value=province.iloc[i][columns[j]]
                 if np.isfinite(value):ax.text(j,i,f'{value:.3f}',ha='center',va='center',color='white' if value<.8 else 'black',fontsize=8)
         ax.set(yticks=range(len(province)),yticklabels=province.index,xticks=range(len(columns)),xticklabels=[LABELS[m] for m in columns],title='Leave-one-province-out discrimination')
+        fig.suptitle('PILOT' if ref_meta['config'].get('pilot') else 'VALIDATION',fontsize=9)
+        if len(columns)>3:plt.setp(ax.get_xticklabels(),rotation=35,ha='right',fontsize=7)
         fig.colorbar(image,ax=ax,label='ROC-AUC',fraction=.03,pad=.03)
         save(fig,'F07_province_transfer','External-test AUC by held-out province, averaged over the available fitting seeds. All values are descriptive; repeated seeds do not create independent territories.',dict(scheme='leave_province_out',fold='all_available_provinces',seed=None,seeds=ref_meta['config'].get('seeds'),run_status='PILOT' if ref_meta['config'].get('pilot') else 'VALIDATION',reference_code_sha256=ref_meta.get('code_sha256')))
 
@@ -219,11 +221,27 @@ def build_paper_figures(results,out,dataset=None,inventory=None,reference_result
         if not deltas.empty:
             deltas['baseline']=deltas.get('baseline',pd.Series('mlp',index=deltas.index)).fillna('mlp')
             deltas=deltas[(deltas.seed==seed)&(deltas.status=='approximate_spatial_block_bootstrap')].copy()
-            labels=[f'{SCHEMES.get(r.scheme,r.scheme)}: {r.fold}\nvs {LABELS[r.baseline]}' for r in deltas.itertuples()]
-            fig,ax=plt.subplots(figsize=(7.2,max(3.5,len(deltas)*.38)))
-            for i,row in enumerate(deltas.itertuples()):
-                ax.errorbar(row.delta_auc,i,xerr=[[row.delta_auc-row.lower],[row.upper-row.delta_auc]],fmt='o',color=COLORS.get(row.baseline,'#333333'),capsize=3,ms=4)
-            ax.axvline(0,color='#777777',ls='--',lw=1);ax.set(yticks=range(len(deltas)),yticklabels=labels,xlabel='AUC attention − AUC control',title=f'{status}: attention ablation');ax.invert_yaxis();ax.grid(axis='x',alpha=.15)
+            comparisons=list(deltas[['scheme','fold']].drop_duplicates().itertuples(index=False,name=None))
+            def comparison_label(s,f):
+                if s=='random_pairs':return 'Random pairs'
+                if s=='spatial_blocks':return str(f).replace('fold_','Block ')
+                if s=='leave_province_out':return 'Province: '+str(f)
+                return 'Year: '+str(f)
+            labels=[comparison_label(s,f) for s,f in comparisons]
+            baselines=[b for b in ['mlp','mlp_matched'] if b in deltas.baseline.unique()]
+            fig,axes=plt.subplots(1,len(baselines),figsize=(7.2,max(3.5,len(comparisons)*.27)),sharex=True,sharey=True,squeeze=False)
+            for ax,baseline in zip(axes.flat,baselines):
+                for i,(s,f) in enumerate(comparisons):
+                    rows=deltas[(deltas.scheme==s)&(deltas.fold==f)&(deltas.baseline==baseline)]
+                    if rows.empty:continue
+                    row=rows.iloc[0];color=COLORS[baseline]
+                    ax.hlines(i,row.lower,row.upper,color=color,lw=1.3)
+                    ax.vlines([row.lower,row.upper],i-.07,i+.07,color=color,lw=.8)
+                    ax.plot(row.delta_auc,i,'o',color=color,ms=3.5)
+                ax.axvline(0,color='#777777',ls='--',lw=.8)
+                ax.set(yticks=range(len(labels)),yticklabels=labels,xlabel='AUC difference',title='vs MLP' if baseline=='mlp' else 'vs capacity control')
+                ax.tick_params(labelsize=7);ax.grid(axis='x',alpha=.15)
+            axes[0,0].invert_yaxis();fig.suptitle(f'{status}: attention ablation | seed {seed}',fontsize=9)
             save(fig,'F09_attention_ablation','Paired AUC differences on the same external-test cases. Bars are approximate spatial-block bootstrap intervals from the recorded run. They are conditional on the sample and block design and are not a confirmatory claim of superiority.',dict(scheme='multiple_designs',fold='recorded_comparisons'))
 
     # F10: ablaciones reales alineadas por diseño, fold, semilla y modelo.
@@ -246,6 +264,7 @@ def build_paper_figures(results,out,dataset=None,inventory=None,reference_result
             if np.isfinite(value):ax.text(j,i,f'{value:+.3f}',ha='center',va='center',fontsize=7,color='white' if abs(value)>.65*limit else 'black')
         variant_labels={'no_climate':'Without climate','no_spectral':'Without spectral\nindices','raw_aspect':'Raw aspect'}
         ax.set(yticks=range(len(heat)),yticklabels=heat.index,xticks=range(len(heat.columns)),xticklabels=[variant_labels.get(c,c) for c in heat.columns],title='Covariate sensitivity: change relative to full features')
+        fig.suptitle(('PILOT' if ref_meta['config'].get('pilot') else 'VALIDATION')+f' | seed {seed}',fontsize=9)
         fig.colorbar(image,ax=ax,label='Change in ROC-AUC',fraction=.03,pad=.03)
         save(fig,'F10_covariate_ablation','Mean paired differences from the full-feature model for matching external partitions and fitting seed. Negative values indicate lower AUC after the change. These are descriptive differences, not independent-fold confidence intervals.',dict(scheme='multiple_designs',fold='matching_external_partitions',run_status='PILOT' if ref_meta['config'].get('pilot') else 'VALIDATION',reference_code_sha256=ref_meta.get('code_sha256')))
         table.to_csv(out/'covariate_ablation_values.csv',index=False)

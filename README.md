@@ -1,115 +1,58 @@
 # Susceptibilidad de incendios forestales en Ecuador
 
-Código de investigación para comparar Random Forest y una MLP con atención,
-analizar SHAP, revisar la estacionalidad y auditar los datos del proyecto.
+## Un solo cuaderno para el estudio
 
-## Investigación con la base trazable 2019–2025
+**[Abrir el estudio completo en Google Colab](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/00_ESTUDIO_COMPLETO_INCENDIOS.ipynb)**
 
-Estos cuadernos trabajan con el esquema que conserva coordenadas, fecha,
-provincia e identificadores. Usa `dataset_modelo_incendios_sierra_2019_2025.csv`;
-no es intercambiable con el dataset antiguo de ocho covariables sin trazabilidad.
+Ejecuta las celdas en orden o selecciona **Entorno de ejecución → Ejecutar todas**.
+Carga una sola vez `dataset_modelo_incendios_sierra_2019_2025.csv`. El cuaderno
+contiene el código completo y conecta auditoría, comparación de modelos,
+validación espacial y temporal, ablaciones, 13 figuras, SHAP y una guía para
+redactar el paper. No necesita ZIP ni resultados de otros cuadernos.
 
-| Proceso | Abrir en Colab |
-|---|---|
-| Auditoría de datos y contraste con tablas fuente | [Cuaderno 12](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/investigacion/12_auditoria_2019_2025.ipynb) |
-| Bloques geográficos, provincias, tiempo y ablación de atención | [Cuaderno 13](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/investigacion/13_validacion_espacial_temporal.ipynb) |
-| Comparación de campañas de pseudoausencias | [Cuaderno 14](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/investigacion/14_sensibilidad_pseudoausencias.ipynb) |
-| Galería reproducible de figuras para el artículo | [Cuaderno 15](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/investigacion/15_figuras_articulo.ipynb) |
+Con Drive activado guarda los datos, avances, configuraciones y resultados en
+`MyDrive/Susceptibilidad_Incendios_Estudio`. Las etapas terminadas se reutilizan
+si coinciden datos, código, parámetros y entorno. El modo predeterminado es
+**COMPLETO**; puede requerir varias horas en CPU. `RAPIDO` comprueba el recorrido
+y etiqueta los resultados como piloto. Una etapa interrumpida durante su ajuste
+se repite; las etapas completas compatibles se conservan.
 
-El [protocolo de investigación](docs/PROTOCOLO_VALIDACION.md) define hipótesis,
-particiones, controles de fuga, métricas y límites. El código completo está visible
-en los cuadernos. Empieza por el 12 y luego ejecuta el piloto del 13. La ejecución
-completa exige más cómputo que el piloto; sus parámetros se muestran antes de entrenar.
+La [guía del cuaderno único](docs/CUADERNO_UNICO.md) explica entradas, etapas,
+resultados guardados y alcance de la reproducibilidad.
 
-Se comparan logística, RF, boosting y tres variantes neuronales, incluida una
-MLP sin atención de capacidad aproximadamente equivalente. La arquitectura de
-referencia para la ablación es nueva y no sustituye el checkpoint histórico.
+## Protocolo y límites
 
-El cuaderno 14 requiere al menos dos campañas reales comparables. No genera
-covariables ficticias ni sustituye el código de extracción pendiente de recuperar.
-La ventana preincendio documentada debe verificarse con el código exacto o
-metadatos de adquisición. El test temporal es retrospectivo por el diseño de
-exclusión de pseudoausencias; los scores caso-control no son probabilidades poblacionales.
-La [revisión del script GEE aportado](docs/REVISION_GEE.md) distingue su variante
-de Imbabura de las decisiones descritas en la bitácora de la base trazable.
+Se comparan regresión logística, Random Forest, boosting, MLP, MLP de capacidad
+similar y red con atención sobre las mismas particiones externas. Se registran
+semillas, versiones, hashes, métricas, predicciones y controles de independencia.
+Los modelos usan ocho covariables físicas; orientación circular genera nueve
+canales. Las coordenadas, provincia y fecha se usan para trazabilidad y validación.
 
-Los módulos de terminal están en `src/research_validation.py` y `src/research_audit.py`.
-Instala `requirements-research.txt` para usarlos. Los controles de independencia
-se ejecutan con `python -m unittest discover -s tests -v`.
+La reproducción comienza en el CSV trazable. La extracción GEE exacta todavía
+debe reconciliarse con la bitácora; véase la [revisión del script](docs/REVISION_GEE.md).
+Las pseudoausencias ya están en el CSV. Campañas adicionales y mapas continuos
+requieren insumos propios y no se fabrican a partir de resultados anteriores.
+El test temporal es retrospectivo; los scores caso-control no son probabilidades
+poblacionales de incendio. El protocolo no garantiza aceptación editorial Q1.
 
-La [guía de figuras](docs/FIGURAS_ARTICULO.md) describe ROC/PR, matrices,
-calibración del muestreo, transferencia territorial, aprendizaje, ablaciones,
-SHAP y routing de atención. La galería exporta PNG de 600 dpi, SVG y PDF, con
-leyendas y procedencia. El código está en `src/paper_figures.py` y
-`src/paper_explainability.py`; instala `requirements-figures.txt` para usarlo localmente.
+Consulta el [protocolo de validación](docs/PROTOCOLO_VALIDACION.md) y la
+[guía de figuras](docs/FIGURAS_ARTICULO.md) para los detalles científicos.
 
-## Cuadernos históricos de la carpeta inicial
+## Colaborar y ejecutar localmente
 
-Cada cuaderno contiene el código visible en celdas editables, comentarios,
-inspección de los CSV, parámetros, entrenamiento o análisis, métricas y gráficos.
-No requiere cargar ZIP ni clonar scripts. Abre un cuaderno, ejecuta las celdas
-en orden y carga únicamente los CSV que indique. No se incluyen los datasets.
+El código reutilizable está en `src/`; instala `requirements-figures.txt`.
+Ejecuta los controles con `python -m unittest discover -s tests -v`.
+Propón cambios en una rama y pull request siguiendo [CONTRIBUTING.md](CONTRIBUTING.md).
+El cuaderno muestra las funciones completas en celdas editables y comentadas.
+Antes de publicar cambios, borra sus salidas para no incluir datos de la sesión.
 
-El cuaderno 06 conserva la comparación histórica con pseudoausencias cercanas.
-Para la base trazable nueva, usa los cuadernos 12 y 13.
+## Versiones anteriores
 
-| Cuaderno | Ejecución |
-|---|---|
-| [Prueba inicial con ausencias sintéticas](notebooks/paso_a_paso/01_demo_sintetica.ipynb) | [Abrir en Colab](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/paso_a_paso/01_demo_sintetica.ipynb) |
-| [Random Forest con presencias y pseudoausencias GEE](notebooks/paso_a_paso/02_rf_gee.ipynb) | [Abrir en Colab](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/paso_a_paso/02_rf_gee.ipynb) |
-| [Importancia Gini de las variables](notebooks/paso_a_paso/03_importancia_rf.ipynb) | [Abrir en Colab](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/paso_a_paso/03_importancia_rf.ipynb) |
-| [Comparación inicial: Random Forest y red de atención](notebooks/paso_a_paso/04_comparacion_inicial.ipynb) | [Abrir en Colab](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/paso_a_paso/04_comparacion_inicial.ipynb) |
-| [Comparación aleatoria y grupos ambientales](notebooks/paso_a_paso/05_bloques_ambientales.ipynb) | [Abrir en Colab](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/paso_a_paso/05_bloques_ambientales.ipynb) |
-| [Comparación con pseudoausencias cercanas](notebooks/paso_a_paso/06_hard_negatives.ipynb) | [Abrir en Colab](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/paso_a_paso/06_hard_negatives.ipynb) |
-| [Explicabilidad SHAP de Random Forest y red de atención](notebooks/paso_a_paso/07_shap.ipynb) | [Abrir en Colab](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/paso_a_paso/07_shap.ipynb) |
-| [Curvas ROC y figuras comparativas del artículo](notebooks/paso_a_paso/08_figuras_articulo.ipynb) | [Abrir en Colab](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/paso_a_paso/08_figuras_articulo.ipynb) |
-| [Estacionalidad histórica de los incendios](notebooks/paso_a_paso/09_estacionalidad.ipynb) | [Abrir en Colab](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/paso_a_paso/09_estacionalidad.ipynb) |
-| [Estacionalidad en una figura de dos paneles](notebooks/paso_a_paso/10_estacionalidad_panel.ipynb) | [Abrir en Colab](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/paso_a_paso/10_estacionalidad_panel.ipynb) |
-| [Auditoría de registros y muestras de entrenamiento](notebooks/paso_a_paso/11_auditoria.ipynb) | [Abrir en Colab](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/paso_a_paso/11_auditoria.ipynb) |
+Los cuadernos de `notebooks/paso_a_paso/` y `notebooks/investigacion/` se conservan
+como antecedentes y herramientas de análisis separado. **No son requisitos del
+cuaderno principal**. Su documentación está en [CUADERNOS.md](docs/CUADERNOS.md).
+Las comparaciones históricas tienen configuraciones y datos diferentes; sus
+resultados no deben mezclarse automáticamente con la ejecución nueva.
 
-Los cuadernos 01 (ausencias sintéticas) y 05 (grupos ambientales) documentan
-pruebas preliminares. El 05 no es validación espacial ni validación cruzada
-por provincias. SHAP y las figuras del artículo vuelven a entrenar modelos;
-sus configuraciones no son idénticas entre versiones.
-
-## Qué se observa en cada cuaderno
-
-1. Objetivo, archivos de entrada y límites del protocolo.
-2. Bibliotecas, parámetros y carpeta de la ejecución.
-3. Muestra de datos, dimensiones, tipos, nulos y balance de clases cuando corresponde.
-4. Código de preparación, arquitectura, entrenamiento y análisis por etapas.
-5. Progreso de las épocas de la red y figuras PNG al guardarse.
-6. Tablas, descarga de salidas y registro de parámetros, versiones y hashes.
-7. Plantilla para describir una hipótesis, una modificación y sus resultados.
-
-Los comentarios originales se conservan. Se añade visualización y registro;
-los valores predeterminados del protocolo histórico se mantienen. En el cuaderno
-SHAP se corrige la asociación entre filas explicadas y colores del gráfico.
-Los pesos de atención, Gini y SHAP son indicadores distintos y no demuestran causalidad.
-
-## Colaborar
-
-Lee [CONTRIBUTING.md](CONTRIBUTING.md) y la [guía de cuadernos](docs/CUADERNOS.md).
-Abre un Issue para discutir propuestas y un pull request para revisar el código.
-Antes de guardar un cuaderno en GitHub, borra sus salidas y comprueba que no
-contengan datos privados. Las salidas de una sesión no se publican automáticamente.
-
-## Estado
-
-Se comprobó la sintaxis de los 11 cuadernos históricos y la ejecución secuencial del código
-de RF con GEE, importancia RF y auditoría usando datos locales. En esa comprobación
-se sustituyeron solo las funciones de presentación de Jupyter; falta revisar su
-renderizado y el flujo completo en Colab. Las redes históricas, SHAP y estacionalidad
-no se han vuelto a ejecutar como parte de esa migración. La nueva capa de investigación
-sí se ejecutó localmente con modelos clásicos, ablaciones de covariables y un piloto
-neuronal con control de capacidad. Cinco pruebas automáticas verifican controles de
-independencia, bloqueo del año reservado y uso exclusivo del entrenamiento para el ajuste.
-Las salidas científicas locales no se publican en este repositorio.
-
-La extracción satelital GEE y los mapas no están reproducidos aquí. Los cuadernos
-trabajan con CSV ya extraídos. La licencia del código y la distribución de los
-datos siguen pendientes de definición. Los resultados históricos no se incluyen
-en esta actualización pública.
-
-El primer cuaderno `notebooks/01_entrenamiento_colab.ipynb` y `src/train.py`
-se conservan como versión inicial de ejecución mediante script.
+No se distribuyen los datos ni resultados privados. La fuente institucional,
+licencia y permisos de redistribución de los datos siguen pendientes de documentar.

@@ -62,7 +62,10 @@ def explain_paper_figures(results,out,dataset,api=None,n_shap=120,n_background=3
     shap_values={};permutations={};additivity={}
     manifest_path=out/'figures_manifest.json';manifest=json.loads(manifest_path.read_text(encoding='utf-8')) if manifest_path.exists() else []
     provenance=dict(data_sha256=meta['data_sha256'],run_status='PILOT' if cfg.get('pilot') else 'VALIDATION',scheme=scheme,fold=str(fold),seed=seed,
-        reproduction_max_abs_error=max_errors,n_explained=len(test_sample),background_n=len(background),coalitions=coalitions)
+        reproduction_max_abs_error=max_errors,n_explained=len(test_sample),background_n=len(background),coalitions=coalitions,
+        permutation_cases=len(permutation_sample),permutation_repeats=permutation_repeats,
+        predictions_sha256=hashlib.sha256((results/'predictions.csv').read_bytes()).hexdigest(),explainer_version=shap.__version__,
+        explanation_code_sha256=globals().get('EXPLANATION_CODE_SHA','unversioned'))
     for name,predictor in predictors.items():
         print('Calculando SHAP:',name,flush=True)
         # Mismo explainer, background y casos; orientación se transforma conjuntamente a seno/coseno.
@@ -89,7 +92,7 @@ def explain_paper_figures(results,out,dataset,api=None,n_shap=120,n_background=3
         routing=weights.mean(dim=(0,1)).numpy()
     np.testing.assert_allclose(routing.sum(axis=1),1,atol=1e-5)
     np.savez_compressed(out/'explanation_plot_data.npz',raw_samples=raw[test_sample],shap_rf=shap_values['rf'],shap_attention=shap_values['attention'],
-        permutation_rf=permutations['rf'],permutation_attention=permutations['attention'],routing=routing,features=np.asarray(features),matrix_columns=np.asarray(matrix.columns))
+        permutation_rf=permutations['rf'],permutation_attention=permutations['attention'],routing=routing,features=np.asarray(features,dtype=str),matrix_columns=np.asarray(matrix.columns,dtype=str))
     render_meta=dict(provenance=provenance,max_errors=max_errors,additivity=additivity,selected_epochs=training['selected_epochs'])
     (out/'explanation_render_metadata.json').write_text(json.dumps(render_meta,indent=2),encoding='utf-8')
     return render_explanation_cache(out)
