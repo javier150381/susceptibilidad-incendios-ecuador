@@ -39,3 +39,11 @@ No se sustituyen los grupos ambientales del experimento antiguo por provincias r
 
 No hay salidas privadas incrustadas, historial de figuras ni modelos preentrenados
 en estos cuadernos. Los resultados aparecen al ejecutar con tus propios CSV.
+
+## Base trazable y protocolo científico
+
+Los cuadernos de `notebooks/investigacion/` usan el esquema 2019–2025 con
+coordenadas y fecha. El 12 audita datos; el 13 evalúa transferencia geográfica
+y temporal y ablación de atención; el 14 contrasta campañas reales ya extraídas.
+Consulta `PROTOCOLO_VALIDACION.md` antes de interpretar los resultados.
+Los resultados de los pilotos locales no están incrustados en los cuadernos públicos.

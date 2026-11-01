@@ -10,3 +10,11 @@ data/*
 !data/README.md
 results/*
 !results/.gitkeep
+
+# Archivos y resultados de las sesiones de investigación
+/work/
+/resultados_auditoria/
+/resultados_validacion/
+/resultados_sensibilidad/
+/*.csv
+/*.zip

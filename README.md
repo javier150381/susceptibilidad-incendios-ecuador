@@ -3,14 +3,48 @@
 Código de investigación para comparar Random Forest y una MLP con atención,
 analizar SHAP, revisar la estacionalidad y auditar los datos del proyecto.
 
-## Ejecutar el proceso completo en Colab
+## Investigación con la base trazable 2019–2025
+
+Estos cuadernos trabajan con el esquema que conserva coordenadas, fecha,
+provincia e identificadores. Usa `dataset_modelo_incendios_sierra_2019_2025.csv`;
+no es intercambiable con el dataset antiguo de ocho covariables sin trazabilidad.
+
+| Proceso | Abrir en Colab |
+|---|---|
+| Auditoría de datos y contraste con tablas fuente | [Cuaderno 12](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/investigacion/12_auditoria_2019_2025.ipynb) |
+| Bloques geográficos, provincias, tiempo y ablación de atención | [Cuaderno 13](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/investigacion/13_validacion_espacial_temporal.ipynb) |
+| Comparación de campañas de pseudoausencias | [Cuaderno 14](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/investigacion/14_sensibilidad_pseudoausencias.ipynb) |
+
+El [protocolo de investigación](docs/PROTOCOLO_VALIDACION.md) define hipótesis,
+particiones, controles de fuga, métricas y límites. El código completo está visible
+en los cuadernos. Empieza por el 12 y luego ejecuta el piloto del 13. La ejecución
+completa exige más cómputo que el piloto; sus parámetros se muestran antes de entrenar.
+
+Se comparan logística, RF, boosting y tres variantes neuronales, incluida una
+MLP sin atención de capacidad aproximadamente equivalente. La arquitectura de
+referencia para la ablación es nueva y no sustituye el checkpoint histórico.
+
+El cuaderno 14 requiere al menos dos campañas reales comparables. No genera
+covariables ficticias ni sustituye el código de extracción pendiente de recuperar.
+La ventana preincendio documentada debe verificarse con el código exacto o
+metadatos de adquisición. El test temporal es retrospectivo por el diseño de
+exclusión de pseudoausencias; los scores caso-control no son probabilidades poblacionales.
+La [revisión del script GEE aportado](docs/REVISION_GEE.md) distingue su variante
+de Imbabura de las decisiones descritas en la bitácora de la base trazable.
+
+Los módulos de terminal están en `src/research_validation.py` y `src/research_audit.py`.
+Instala `requirements-research.txt` para usarlos. Los controles de independencia
+se ejecutan con `python -m unittest discover -s tests -v`.
+
+## Cuadernos históricos de la carpeta inicial
 
 Cada cuaderno contiene el código visible en celdas editables, comentarios,
 inspección de los CSV, parámetros, entrenamiento o análisis, métricas y gráficos.
 No requiere cargar ZIP ni clonar scripts. Abre un cuaderno, ejecuta las celdas
 en orden y carga únicamente los CSV que indique. No se incluyen los datasets.
 
-**Empieza por la comparación con pseudoausencias cercanas (cuaderno 06).**
+El cuaderno 06 conserva la comparación histórica con pseudoausencias cercanas.
+Para la base trazable nueva, usa los cuadernos 12 y 13.
 
 | Cuaderno | Ejecución |
 |---|---|
@@ -55,11 +89,15 @@ contengan datos privados. Las salidas de una sesión no se publican automáticam
 
 ## Estado
 
-Se comprobó la sintaxis de los 11 cuadernos y la ejecución secuencial del código
+Se comprobó la sintaxis de los 11 cuadernos históricos y la ejecución secuencial del código
 de RF con GEE, importancia RF y auditoría usando datos locales. En esa comprobación
 se sustituyeron solo las funciones de presentación de Jupyter; falta revisar su
-renderizado y el flujo completo en Colab. Las redes, SHAP y estacionalidad aún no
-se han ejecutado como parte de esta migración.
+renderizado y el flujo completo en Colab. Las redes históricas, SHAP y estacionalidad
+no se han vuelto a ejecutar como parte de esa migración. La nueva capa de investigación
+sí se ejecutó localmente con modelos clásicos, ablaciones de covariables y un piloto
+neuronal con control de capacidad. Cinco pruebas automáticas verifican controles de
+independencia, bloqueo del año reservado y uso exclusivo del entrenamiento para el ajuste.
+Las salidas científicas locales no se publican en este repositorio.
 
 La extracción satelital GEE y los mapas no están reproducidos aquí. Los cuadernos
 trabajan con CSV ya extraídos. La licencia del código y la distribución de los
