@@ -14,6 +14,7 @@ no es intercambiable con el dataset antiguo de ocho covariables sin trazabilidad
 | Auditoría de datos y contraste con tablas fuente | [Cuaderno 12](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/investigacion/12_auditoria_2019_2025.ipynb) |
 | Bloques geográficos, provincias, tiempo y ablación de atención | [Cuaderno 13](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/investigacion/13_validacion_espacial_temporal.ipynb) |
 | Comparación de campañas de pseudoausencias | [Cuaderno 14](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/investigacion/14_sensibilidad_pseudoausencias.ipynb) |
+| Galería reproducible de figuras para el artículo | [Cuaderno 15](https://colab.research.google.com/github/javier150381/susceptibilidad-incendios-ecuador/blob/main/notebooks/investigacion/15_figuras_articulo.ipynb) |
 
 El [protocolo de investigación](docs/PROTOCOLO_VALIDACION.md) define hipótesis,
 particiones, controles de fuga, métricas y límites. El código completo está visible
@@ -35,6 +36,12 @@ de Imbabura de las decisiones descritas en la bitácora de la base trazable.
 Los módulos de terminal están en `src/research_validation.py` y `src/research_audit.py`.
 Instala `requirements-research.txt` para usarlos. Los controles de independencia
 se ejecutan con `python -m unittest discover -s tests -v`.
+
+La [guía de figuras](docs/FIGURAS_ARTICULO.md) describe ROC/PR, matrices,
+calibración del muestreo, transferencia territorial, aprendizaje, ablaciones,
+SHAP y routing de atención. La galería exporta PNG de 600 dpi, SVG y PDF, con
+leyendas y procedencia. El código está en `src/paper_figures.py` y
+`src/paper_explainability.py`; instala `requirements-figures.txt` para usarlo localmente.
 
 ## Cuadernos históricos de la carpeta inicial
 

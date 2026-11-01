@@ -18,3 +18,5 @@ results/*
 /resultados_sensibilidad/
 /*.csv
 /*.zip
+/figuras_paper/
+/inputs_figures/

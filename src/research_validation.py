@@ -195,7 +195,7 @@ def neural_model(features, attention, cfg):
     return FeatureTokens()
 
 
-def fit_neural(X, y, df, train, test, scheme, attention, cfg):
+def fit_neural(X, y, df, train, test, scheme, attention, cfg, on_fitted=None):
     """Selecciona épocas internamente y vuelve a ajustar en todo el train externo."""
     import torch
     from torch import nn
@@ -245,6 +245,9 @@ def fit_neural(X, y, df, train, test, scheme, attention, cfg):
     model.eval()
     with torch.no_grad():
         probabilities=torch.sigmoid(model(torch.tensor(scaler.transform(X[test]),dtype=torch.float32,device=device))).cpu().numpy()
+    if on_fitted is not None:
+        # Permite explicar el modelo reajustado sin alterar predicciones ni métricas.
+        on_fitted(model,scaler)
     return probabilities,dict(selected_epochs=best_epoch,parameters=sum(p.numel() for p in model.parameters()),history=history)
 
 # %% Métricas y registro de cada partición
